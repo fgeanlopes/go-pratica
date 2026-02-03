@@ -156,12 +156,13 @@ func Delete(c *gin.Context) {
 	ProductId, err := strconv.ParseUint(id, 10, 32)
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "ID inválido"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
 		return
 	}
 
 	var productDelete models.Product
 
+	// TODO otimizar para evitar 2 round-trips
 	if err := database.DB.First(&productDelete, uint(ProductId)).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "ID não encontrado"})
 		return
