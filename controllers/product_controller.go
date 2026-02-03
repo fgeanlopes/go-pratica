@@ -63,7 +63,6 @@ func UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	// Validação usando govalidator
 	if _, err := govalidator.ValidateStruct(update); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -98,31 +97,80 @@ func UpdateProduct(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
-
-	//Buscar o produto
-	//Atualizar o model
-	//Salvar o model no banco
-
-	// var productUpdate models.Product
-
-	// if update.Name != nil {
-	// 	update.Name = *&update.Name
-	// }
-
-	// if update.Price != nil {
-	// 	update.Price = *&update.Price
-	// }
-
 }
 
 func GetProducts(c *gin.Context) {
 
+	var getProducts []models.Product
+
+	if err := database.DB.Find(&getProducts).Error; err != nil {
+		c.JSON(http.StatusCreated, gin.H{"error": "Produtos não encontrados"})
+		return
+	}
+
+	var responses []dto.ProductResponse
+
+	for _, p := range getProducts {
+		responses = append(responses, dto.ProductResponse{
+			ID:        p.ID,
+			Name:      p.Name,
+			Price:     p.Price,
+			CreatedAt: p.CreatedAt,
+			UpdatedAt: p.UpdatedAt,
+		})
+	}
+
+	c.JSON(http.StatusOK, responses)
 }
 
 func GetProductByID(c *gin.Context) {
+	id := c.Param("id")
 
+	productId, err := strconv.ParseInt(id, 10, 32)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
+		return
+	}
+
+	var getProductId models.Product
+
+	if err := database.DB.First(&getProductId, uint(productId)).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Produto não encontrado"})
+	}
+
+	response := dto.ProductResponse{
+		ID:        getProductId.ID,
+		Name:      getProductId.Name,
+		Price:     getProductId.Price,
+		CreatedAt: getProductId.CreatedAt,
+		UpdatedAt: getProductId.UpdatedAt,
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func Delete(c *gin.Context) {
+	id := c.Param("id")
 
+	ProductId, err := strconv.ParseUint(id, 10, 32)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ID inválido"})
+		return
+	}
+
+	var productDelete models.Product
+
+	if err := database.DB.First(&productDelete, uint(ProductId)).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ID não encontrado"})
+		return
+	}
+
+	if err := database.DB.Delete(&productDelete, uint(ProductId)).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao deletar produto:" + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
 }
