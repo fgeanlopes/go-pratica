@@ -8,8 +8,8 @@ type ProductCreate struct {
 }
 
 type ProductUpdate struct {
-	Name  *string  `json:"name" valid:"required~O nome do produto não pode ser vazio"`
-	Price *float64 `json:"price" valid:"required~O preço é obrigatório"`
+	Name  *string  `json:"name" valid:"optional,stringlength(3|100)~Nome deve ter entre 3 e 100 caracteres"`
+	Price *float64 `json:"price" valid:"optional,float~Preço deve ser maior que zero"`
 }
 
 type ProductResponse struct {

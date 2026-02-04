@@ -63,6 +63,11 @@ func UpdateProduct(c *gin.Context) {
 		return
 	}
 
+	if update.Price != nil && (*update.Price < 0.01 || *update.Price > 999999) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Preço deve ser maior que zero"})
+		return
+	}
+
 	if _, err := govalidator.ValidateStruct(update); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -71,7 +76,7 @@ func UpdateProduct(c *gin.Context) {
 	var productUpdate models.Product
 
 	if err := database.DB.First(&productUpdate, uint(productID)).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"erro": "Produto não encontrado"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Produto não encontrado"})
 		return
 	}
 
@@ -104,7 +109,7 @@ func GetProducts(c *gin.Context) {
 	var getProducts []models.Product
 
 	if err := database.DB.Find(&getProducts).Error; err != nil {
-		c.JSON(http.StatusCreated, gin.H{"error": "Produtos não encontrados"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Produtos não encontrados"})
 		return
 	}
 
@@ -137,6 +142,7 @@ func GetProductByID(c *gin.Context) {
 
 	if err := database.DB.First(&getProductId, uint(productId)).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Produto não encontrado"})
+		return
 	}
 
 	response := dto.ProductResponse{
