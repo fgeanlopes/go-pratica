@@ -75,20 +75,20 @@ A API estará disponível em `http://localhost:3000`
 
 ## 📍 Endpoints Disponíveis
 
-| Método | Endpoint        | Descrição                   |
-| ------ | --------------- | --------------------------- |
-| POST   | `/products`     | Criar um novo produto       |
-| GET    | `/products`     | Listar todos os produtos    |
-| GET    | `/products/:id` | Buscar produto por ID       |
-| PUT    | `/products/:id` | Atualizar produto existente |
-| DELETE | `/products/:id` | Deletar produto             |
+| Método | Endpoint       | Descrição                   |
+| ------ | -------------- | --------------------------- |
+| POST   | `/clients`     | Criar um novo produto       |
+| GET    | `/clients`     | Listar todos os produtos    |
+| GET    | `/clients/:id` | Buscar produto por ID       |
+| PUT    | `/clients/:id` | Atualizar produto existente |
+| DELETE | `/clients/:id` | Deletar produto             |
 
 ### Exemplos de Uso
 
 **Criar produto:**
 
 ```json
-POST /products
+POST /clients
 {
   "name": "Notebook",
   "price": 2999.99
@@ -98,7 +98,7 @@ POST /products
 **Atualizar produto:**
 
 ```json
-PUT /products/1
+PUT /clients/1
 {
   "name": "Notebook Gamer",
   "price": 3499.99

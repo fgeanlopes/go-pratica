@@ -34,7 +34,7 @@ func ConnectDatabase() {
 	fmt.Println("✅ Conexão com banco de dados estabelecida!")
 
 	// Auto-migrate: cria/atualiza as tabelas automaticamente
-	database.AutoMigrate(&models.Product{})
+	database.AutoMigrate(&models.Client{})
 	fmt.Println("✅ Migração concluída!")
 
 	DB = database
