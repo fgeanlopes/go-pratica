@@ -1,10 +1,12 @@
 package dto
 
+import "go-pratica/models"
+
 // =====================================================
-// DTO para criar um novo cliente
-// Usado no endpoint: POST /api/v1/clients
+// DTO cliente
+// Usado no endpoint: POST e PUT na api /api/v1/clients
 // =====================================================
-type CreateClientRequest struct {
+type ClientRequest struct {
 	Name           string `json:"name" binding:"required,min=3,max=255"`
 	CPF            string `json:"cpf" binding:"required"`
 	PrimaryPhone   string `json:"primary_phone" binding:"required"`
@@ -21,16 +23,23 @@ type CreateClientRequest struct {
 	State        string `json:"state,omitempty" binding:"omitempty,len=2"`
 }
 
-// =====================================================
-// DTO para atualizar cliente existente
-// Usado no endpoint: PUT /api/v1/clients/:id
-// =====================================================
-type UpdateClientRequest struct {
-	Name           string `json:"name" binding:"omitempty,min=3,max=255"`
-	PrimaryPhone   string `json:"primary_phone,omitempty"`
-	SecondaryPhone string `json:"secondary_phone,omitempty"`
-	Email          string `json:"email,omitempty" binding:"omitempty,email"`
-	Status         string `json:"status,omitempty" binding:"omitempty,oneof=active inactive"`
+// ToClientModel converte o DTO para o modelo de domínio
+func (req *ClientRequest) ToClientModel() models.Client {
+	return models.Client{
+		Name:           req.Name,
+		CPF:            req.CPF,
+		PrimaryPhone:   req.PrimaryPhone,
+		SecondaryPhone: req.SecondaryPhone,
+		Email:          req.Email,
+		ZipCode:        req.ZipCode,
+		Street:         req.Street,
+		Number:         req.Number,
+		Complement:     req.Complement,
+		Neighborhood:   req.Neighborhood,
+		City:           req.City,
+		State:          req.State,
+		Status:         "active", // valor padrão
+	}
 }
 
 // =====================================================
@@ -49,13 +58,16 @@ type ClientResponse struct {
 	UpdatedAt      string `json:"updated_at"`
 }
 
-// =====================================================
-// DTO simplificado de cliente
-// Usado quando cliente aparece dentro de outros objetos (OS, Veículo, etc)
-// =====================================================
-type ClientSimple struct {
-	ID           uint   `json:"id"`
-	Name         string `json:"name"`
-	CPF          string `json:"cpf"`
-	PrimaryPhone string `json:"primary_phone"`
+func ToClientResponse(client models.Client) ClientResponse {
+	return ClientResponse{
+		ID:             client.ID,
+		Name:           client.Name,
+		CPF:            client.CPF,
+		PrimaryPhone:   client.PrimaryPhone,
+		SecondaryPhone: client.SecondaryPhone,
+		Email:          client.Email,
+		Status:         client.Status,
+		CreatedAt:      client.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt:      client.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+	}
 }

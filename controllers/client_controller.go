@@ -12,7 +12,7 @@ import (
 )
 
 func CreateClient(c *gin.Context) {
-	var create dto.CreateClientRequest
+	var create dto.ClientRequest
 
 	if err := c.ShouldBindJSON(&create); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Dados inválidos:" + err.Error()})
@@ -25,24 +25,14 @@ func CreateClient(c *gin.Context) {
 		return
 	}
 
-	clientCreate := models.Client{
-		Name:  create.Name,
-		Price: create.Price,
-	}
+	clientCreate := create.ToClientModel()
 
 	if err := database.DB.Create(&clientCreate).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao criar produto:" + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao criar cliente:" + err.Error()})
 		return
 	}
 
-	response := dto.ClientResponse{
-		ID:        clientCreate.ID,
-		Name:      clientCreate.Name,
-		Price:     clientCreate.Price,
-		CreatedAt: clientCreate.CreatedAt,
-		UpdatedAt: clientCreate.UpdatedAt,
-	}
-
+	response := dto.ToClientResponse(clientCreate)
 	c.JSON(http.StatusCreated, response)
 }
 
@@ -56,15 +46,10 @@ func UpdateClient(c *gin.Context) {
 		return
 	}
 
-	var update dto.ClientUpdate
+	var update dto.ClientRequest
 
 	if err := c.ShouldBindJSON(&update); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Dados inválidos:" + err.Error()})
-		return
-	}
-
-	if update.Price != nil && (*update.Price < 0.01 || *update.Price > 999999) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Preço deve ser maior que zero"})
 		return
 	}
 
@@ -76,30 +61,20 @@ func UpdateClient(c *gin.Context) {
 	var clientUpdate models.Client
 
 	if err := database.DB.First(&clientUpdate, uint(clientID)).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Produto não encontrado"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Cliente não encontrado"})
 		return
 	}
 
-	if update.Name != nil {
-		clientUpdate.Name = *update.Name
-	}
+	// GORM ignora automaticamente campos com zero-value (strings vazias, 0, false, etc.)
+	// Atualiza apenas os campos que foram enviados na requisição
+	updateData := update.ToClientModel()
 
-	if update.Price != nil {
-		clientUpdate.Price = *update.Price
-	}
-
-	if err := database.DB.Save(&clientUpdate).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao atualizar produto:" + err.Error()})
+	if err := database.DB.Model(&clientUpdate).Updates(updateData).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao atualizar cliente:" + err.Error()})
 		return
 	}
 
-	response := dto.ClientResponse{
-		ID:        clientUpdate.ID,
-		Name:      clientUpdate.Name,
-		Price:     clientUpdate.Price,
-		CreatedAt: clientUpdate.CreatedAt,
-		UpdatedAt: clientUpdate.UpdatedAt,
-	}
+	response := dto.ToClientResponse(clientUpdate)
 
 	c.JSON(http.StatusOK, response)
 }
@@ -109,20 +84,14 @@ func GetClients(c *gin.Context) {
 	var getClients []models.Client
 
 	if err := database.DB.Find(&getClients).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Produtos não encontrados"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Clientes não encontrados"})
 		return
 	}
 
 	var responses []dto.ClientResponse
 
 	for _, p := range getClients {
-		responses = append(responses, dto.ClientResponse{
-			ID:        p.ID,
-			Name:      p.Name,
-			Price:     p.Price,
-			CreatedAt: p.CreatedAt,
-			UpdatedAt: p.UpdatedAt,
-		})
+		responses = append(responses, dto.ToClientResponse(p))
 	}
 
 	c.JSON(http.StatusOK, responses)
@@ -141,17 +110,11 @@ func GetClientByID(c *gin.Context) {
 	var getClientId models.Client
 
 	if err := database.DB.First(&getClientId, uint(clientId)).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Produto não encontrado"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Cliente não encontrado"})
 		return
 	}
 
-	response := dto.ClientResponse{
-		ID:        getClientId.ID,
-		Name:      getClientId.Name,
-		Price:     getClientId.Price,
-		CreatedAt: getClientId.CreatedAt,
-		UpdatedAt: getClientId.UpdatedAt,
-	}
+	response := dto.ToClientResponse(getClientId)
 
 	c.JSON(http.StatusOK, response)
 }
@@ -170,12 +133,12 @@ func DeleteClient(c *gin.Context) {
 
 	// TODO otimizar para evitar 2 round-trips
 	if err := database.DB.First(&clientDelete, uint(ClientId)).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "ID não encontrado"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Cliente não encontrado"})
 		return
 	}
 
 	if err := database.DB.Delete(&clientDelete, uint(ClientId)).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao deletar produto:" + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao deletar cliente:" + err.Error()})
 		return
 	}
 
