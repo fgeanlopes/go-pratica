@@ -4,6 +4,7 @@ import (
 	"go-pratica/database"
 	"go-pratica/dto"
 	"go-pratica/models"
+	"go-pratica/utils"
 	"net/http"
 	"strconv"
 
@@ -12,8 +13,10 @@ import (
 )
 
 func CreateClient(c *gin.Context) {
+	// DTO para receber os dados da requisição
 	var create dto.ClientRequest
 
+	// Vincula o JSON da requisição ao DTO e valida os campos obrigatórios
 	if err := c.ShouldBindJSON(&create); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Dados inválidos:" + err.Error()})
 		return
@@ -27,11 +30,32 @@ func CreateClient(c *gin.Context) {
 
 	clientCreate := create.ToClientModel()
 
+	utils.ValidateCpf(clientCreate.CPF)
+
+	cleanCpf, err := utils.ValidateCpf(clientCreate.CPF)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	clientCreate.CPF = cleanCpf
+
+	// Validação do CEP usando a função utilitária
+	utils.ValidateZipCode(clientCreate.ZipCode)
+
+	cleanZip, err := utils.ValidateZipCode(clientCreate.ZipCode)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	clientCreate.ZipCode = cleanZip
+
+	// Criação do cliente no banco de dados
 	if err := database.DB.Create(&clientCreate).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao criar cliente:" + err.Error()})
 		return
 	}
 
+	// Retorna a resposta com os dados do cliente criado
 	response := dto.ToClientResponse(clientCreate)
 	c.JSON(http.StatusCreated, response)
 }
