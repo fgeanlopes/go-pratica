@@ -41,3 +41,31 @@ func ValidateCpf(cpf string) (string, error) {
 
 	return clean, nil
 }
+
+func validateCellPhone(phone string) (string, error) {
+	clean := strings.NewReplacer("(", "", ")", "", ".", "").Replace(phone)
+
+	if len(clean) != 11 {
+		return "", errors.New("Celular deve conter exatamente 11 números")
+	}
+
+	if matcher, _ := regexp.MatchString(`^\d{11}$`, clean); !matcher {
+		return "", errors.New("Celular deve conter apenas números")
+	}
+
+	return clean, nil
+}
+
+func validateTelePhone(phone string) (string, error) {
+	clean := strings.NewReplacer("(", "", ")", "", ".", "").Replace(phone)
+
+	if len(clean) != 10 {
+		return "", errors.New("Telefone deve conter exatamente 10 números")
+	}
+
+	if matcher, _ := regexp.MatchString(`^\d{10}$`, clean); !matcher {
+		return "", errors.New("Telefone deve conter apenas números")
+	}
+
+	return clean, nil
+}
