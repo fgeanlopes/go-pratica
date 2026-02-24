@@ -2,15 +2,15 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
-	"strings"
 )
 
 // ValidateZipCode valida o formato do CEP (apenas números e opcionalmente um traço)
 func ValidateZipCode(zipcode string) (string, error) {
 
 	// Remove o traço, se presente, para retornar apenas os números
-	clean := strings.NewReplacer("-", "", ".", "").Replace(zipcode)
+	clean := regexp.MustCompile(`\D`).ReplaceAllString(zipcode, "")
 
 	// Verifica se o CEP tem exatamente 8 dígitos após a limpeza
 	if len(clean) != 8 {
@@ -27,7 +27,7 @@ func ValidateZipCode(zipcode string) (string, error) {
 
 func ValidateCpf(cpf string) (string, error) {
 	// Remove os pontos e traços, se presentes, para retornar apenas os números
-	clean := strings.NewReplacer("-", "", ".", "").Replace(cpf)
+	clean := regexp.MustCompile(`\D`).ReplaceAllString(cpf, "")
 
 	// Verifica se o CPF tem exatamente 11 dígitos após a limpeza
 	if len(clean) != 11 {
@@ -42,10 +42,11 @@ func ValidateCpf(cpf string) (string, error) {
 	return clean, nil
 }
 
-func validateCellPhone(phone string) (string, error) {
-	clean := strings.NewReplacer("(", "", ")", "", ".", "").Replace(phone)
+func ValidateCellPhone(phone string) (string, error) {
+	clean := regexp.MustCompile(`\D`).ReplaceAllString(phone, "")
 
 	if len(clean) != 11 {
+		fmt.Println("Número de telefone inválido:", clean)
 		return "", errors.New("Celular deve conter exatamente 11 números")
 	}
 
@@ -56,8 +57,8 @@ func validateCellPhone(phone string) (string, error) {
 	return clean, nil
 }
 
-func validateTelePhone(phone string) (string, error) {
-	clean := strings.NewReplacer("(", "", ")", "", ".", "").Replace(phone)
+func ValidateTelePhone(phone string) (string, error) {
+	clean := regexp.MustCompile(`\D`).ReplaceAllString(phone, "")
 
 	if len(clean) != 10 {
 		return "", errors.New("Telefone deve conter exatamente 10 números")
