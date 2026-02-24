@@ -47,7 +47,36 @@ func CreateClient(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	clientCreate.ZipCode = cleanZip
+
+	// Validação do telefone usando a função utilitária
+	utils.ValidateCellPhone(clientCreate.PrimaryPhone)
+
+	// Limpeza do número de telefone para armazenar apenas os dígitos
+	cleanCellPhone, err := utils.ValidateCellPhone(clientCreate.PrimaryPhone)
+
+	// Se houver um erro na validação do telefone, retorna uma resposta de erro
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	clientCreate.PrimaryPhone = cleanCellPhone
+
+	// Validação do telefone usando a função utilitária
+	utils.ValidateTelePhone(clientCreate.SecondaryPhone)
+
+	// Limpeza do número de telefone para armazenar apenas os dígitos
+	cleanTelePhone, err := utils.ValidateTelePhone(clientCreate.SecondaryPhone)
+
+	// Se houver um erro na validação do telefone, retorna uma resposta de erro
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	clientCreate.SecondaryPhone = cleanTelePhone
 
 	// Criação do cliente no banco de dados
 	if err := database.DB.Create(&clientCreate).Error; err != nil {
