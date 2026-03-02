@@ -42,54 +42,61 @@ Sistema completo para gerenciar o pátio de uma mecânica, controlando:
 ## 📐 PADRÕES E NOMENCLATURA
 
 ### **Regra Geral do Projeto:**
+
 - ✅ **TODO CÓDIGO EM INGLÊS** (variáveis, funções, structs, nomes de arquivos, rotas, tabelas)
 - ✅ **COMENTÁRIOS EM PORTUGUÊS** (para facilitar entendimento)
 
 ### **Nomenclatura Padrão:**
 
-| Português | Inglês | Uso |
-|-----------|--------|-----|
-| Cliente | Client | `models/client.go`, `/clients` |
-| Veículo | Vehicle | `models/vehicle.go`, `/vehicles` |
-| Ordem de Serviço | Service Order | `models/service_order.go`, `/service-orders` |
-| Orçamento | Budget | `models/budget.go`, `/budgets` |
-| Pagamento | Payment | `models/payment.go`, `/payments` |
-| Endereço | Address | `models/address.go` |
-| Item do Orçamento | Budget Item | `models/budget_item.go` |
-| Serviço Executado | Executed Service | `models/executed_service.go` |
+| Português         | Inglês           | Uso                                          |
+| ----------------- | ---------------- | -------------------------------------------- |
+| Cliente           | Client           | `models/client.go`, `/clients`               |
+| Veículo           | Vehicle          | `models/vehicle.go`, `/vehicles`             |
+| Ordem de Serviço  | Service Order    | `models/service_order.go`, `/service-orders` |
+| Orçamento         | Budget           | `models/budget.go`, `/budgets`               |
+| Pagamento         | Payment          | `models/payment.go`, `/payments`             |
+| Endereço          | Address          | `models/address.go`                          |
+| Item do Orçamento | Budget Item      | `models/budget_item.go`                      |
+| Serviço Executado | Executed Service | `models/executed_service.go`                 |
 
 ### **Campos Comuns:**
 
-| Português | Inglês |
-|-----------|--------|
-| Nome | Name |
-| CPF | CPF (mantém) |
-| Telefone Principal | Primary Phone |
-| Telefone Secundário | Secondary Phone |
-| Email | Email (mantém) |
-| CEP | Zip Code |
-| Rua | Street |
-| Número | Number |
-| Bairro | Neighborhood |
-| Complemento | Complement |
-| Cidade | City |
-| Estado | State |
-| Placa | Plate |
-| Marca | Brand |
-| Modelo | Model |
-| Ano de Fabricação | Manufacture Year |
-| Ano do Modelo | Model Year |
-| Cor | Color |
-| Quilometragem | Mileage |
-| Status | Status (mantém) |
-| Ativo/Inativo | Active/Inactive |
-| Data de Entrada | Entry Date |
-| Data de Criação | Created At |
-| Data de Atualização | Updated At |
+| Português           | Inglês           |
+| ------------------- | ---------------- |
+| Nome                | Name             |
+| CPF                 | CPF (mantém)     |
+| Telefone Principal  | Primary Phone    |
+| Telefone Secundário | Secondary Phone  |
+| Email               | Email (mantém)   |
+| CEP                 | Zip Code         |
+| Rua                 | Street           |
+| Número              | Number           |
+| Bairro              | Neighborhood     |
+| Complemento         | Complement       |
+| Cidade              | City             |
+| Estado              | State            |
+| Placa               | Plate            |
+| Marca               | Brand            |
+| Modelo              | Model            |
+| Ano de Fabricação   | Manufacture Year |
+| Ano do Modelo       | Model Year       |
+| Cor                 | Color            |
+| Tipo de Combustível | Fuel Type        |
+| Chassi              | Chassis          |
+| RENAVAM             | RENAVAM (mantém) |
+| Quilometragem       | Mileage          |
+| Número do Motor     | Engine Number    |
+| Observações         | Notes            |
+| Status              | Status (mantém)  |
+| Ativo/Inativo       | Active/Inactive  |
+| Data de Entrada     | Entry Date       |
+| Data de Criação     | Created At       |
+| Data de Atualização | Updated At       |
 
 ### **Status e Enums:**
 
 **Status da Ordem de Serviço:**
+
 - `awaiting_budget` (aguardando orçamento)
 - `budget_sent` (orçamento enviado)
 - `approved` (aprovado)
@@ -99,12 +106,23 @@ Sistema completo para gerenciar o pátio de uma mecânica, controlando:
 - `cancelled` (cancelado)
 
 **Status do Orçamento:**
+
 - `pending` (pendente)
 - `approved` (aprovado)
 - `rejected` (recusado)
 - `expired` (expirado)
 
+**Tipos de Combustível:**
+
+- `gasoline` (gasolina)
+- `ethanol` (etanol)
+- `flex` (flex)
+- `diesel` (diesel)
+- `electric` (elétrico)
+- `hybrid` (híbrido)
+
 **Formas de Pagamento:**
+
 - `cash` (dinheiro)
 - `debit_card` (cartão de débito)
 - `credit_card` (cartão de crédito)
@@ -113,11 +131,13 @@ Sistema completo para gerenciar o pátio de uma mecânica, controlando:
 - `check` (cheque)
 
 ### **Padrão de Rotas:**
+
 - Usar **kebab-case** para URLs: `/service-orders`, `/budget-items`
 - Usar **plural** para recursos: `/clients`, `/vehicles`, `/payments`
 - Usar **singular** para ações específicas: `/approve`, `/reject`
 
 ### **Padrão de Arquivos:**
+
 - Usar **snake_case** para arquivos Go: `client_controller.go`, `service_order_dto.go`
 - Usar **PascalCase** para structs: `CreateClientRequest`, `ServiceOrder`
 - Usar **camelCase** para variáveis e funções: `clientID`, `getClientByID`
@@ -165,6 +185,7 @@ Sistema completo para gerenciar o pátio de uma mecânica, controlando:
 ## 🛠️ TECNOLOGIAS
 
 ### Backend
+
 - **Linguagem:** Go 1.21+
 - **Framework Web:** Gin (github.com/gin-gonic/gin)
 - **ORM:** GORM (gorm.io/gorm)
@@ -174,11 +195,13 @@ Sistema completo para gerenciar o pátio de uma mecânica, controlando:
 - **Hot Reload:** Air
 
 ### Banco de Dados
+
 - **SGBD:** MySQL 8.0+
 - **Charset:** utf8mb4
 - **Collation:** utf8mb4_unicode_ci
 
 ### Futuro (Frontend)
+
 - **Framework:** Next.js 15+
 - **Linguagem:** TypeScript
 
@@ -280,6 +303,7 @@ go-pratica/
 ### Entidades e Atributos
 
 #### **1. CLIENT (Cliente)**
+
 - `id` (PK)
 - `name`
 - `cpf` (UNIQUE)
@@ -292,6 +316,7 @@ go-pratica/
 - `deleted_at` (soft delete)
 
 #### **2. ADDRESS (Endereço)**
+
 - `id` (PK)
 - `client_id` (FK → CLIENT)
 - `zip_code`
@@ -306,6 +331,7 @@ go-pratica/
 - `updated_at`
 
 #### **3. VEHICLE (Veículo)**
+
 - `id` (PK)
 - `client_id` (FK → CLIENT)
 - `plate` (UNIQUE)
@@ -314,13 +340,19 @@ go-pratica/
 - `manufacture_year`
 - `model_year`
 - `color`
-- `chassis`
-- `current_mileage`
+- `fuel_type` (ENUM: gasoline, ethanol, flex, diesel, electric, hybrid)
+- `chassis` (REQUIRED)
+- `renavam` (REQUIRED)
+- `current_mileage` (REQUIRED)
+- `engine_number` (REQUIRED)
+- `status` (OPTIONAL)
+- `notes` (OPTIONAL)
 - `created_at`
 - `updated_at`
 - `deleted_at`
 
 #### **4. SERVICE_ORDER (Ordem de Serviço)**
+
 - `id` (PK)
 - `order_number` (UNIQUE, AUTO INCREMENT)
 - `client_id` (FK → CLIENT)
@@ -336,6 +368,7 @@ go-pratica/
 - `updated_at`
 
 **Status possíveis:**
+
 - `awaiting_budget`
 - `budget_sent`
 - `approved`
@@ -345,6 +378,7 @@ go-pratica/
 - `cancelled`
 
 #### **5. BUDGET (Orçamento)**
+
 - `id` (PK)
 - `service_order_id` (FK → SERVICE_ORDER)
 - `budget_number`
@@ -362,6 +396,7 @@ go-pratica/
 - `updated_at`
 
 #### **6. BUDGET_ITEM (Item do Orçamento)**
+
 - `id` (PK)
 - `budget_id` (FK → BUDGET)
 - `type` (ENUM: part, service)
@@ -374,6 +409,7 @@ go-pratica/
 - `updated_at`
 
 #### **7. EXECUTED_SERVICE (Serviço Executado)**
+
 - `id` (PK)
 - `service_order_id` (FK → SERVICE_ORDER)
 - `mechanic_name`
@@ -387,6 +423,7 @@ go-pratica/
 - `updated_at`
 
 #### **8. PAYMENT (Pagamento)**
+
 - `id` (PK)
 - `service_order_id` (FK → SERVICE_ORDER)
 - `payment_date`
@@ -400,6 +437,7 @@ go-pratica/
 - `updated_at`
 
 **Formas de pagamento:**
+
 - `cash`
 - `debit_card`
 - `credit_card`
@@ -475,9 +513,14 @@ CREATE TABLE veiculos (
     modelo VARCHAR(100) NOT NULL,
     ano_fabricacao INT NOT NULL,
     ano_modelo INT NOT NULL,
-    cor VARCHAR(50),
-    chassi VARCHAR(50),
-    quilometragem_atual INT DEFAULT 0,
+    cor VARCHAR(50) NOT NULL,
+    tipo_combustivel ENUM('gasolina', 'etanol', 'flex', 'diesel', 'eletrico', 'hibrido') NOT NULL,
+    chassi VARCHAR(17) NOT NULL,
+    renavam VARCHAR(11) NOT NULL,
+    quilometragem_atual INT NOT NULL,
+    numero_motor VARCHAR(50) NOT NULL,
+    status VARCHAR(50),
+    observacoes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
@@ -678,9 +721,14 @@ CREATE TABLE veiculos (
     modelo VARCHAR(100) NOT NULL,
     ano_fabricacao INT NOT NULL,
     ano_modelo INT NOT NULL,
-    cor VARCHAR(50),
-    chassi VARCHAR(50),
-    quilometragem_atual INT DEFAULT 0,
+    cor VARCHAR(50) NOT NULL,
+    tipo_combustivel ENUM('gasolina', 'etanol', 'flex', 'diesel', 'eletrico', 'hibrido') NOT NULL,
+    chassi VARCHAR(17) NOT NULL,
+    renavam VARCHAR(11) NOT NULL,
+    quilometragem_atual INT NOT NULL,
+    numero_motor VARCHAR(50) NOT NULL,
+    status VARCHAR(50),
+    observacoes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
@@ -815,63 +863,64 @@ SELECT 'Banco de dados criado com sucesso!' AS status;
 ## 🛣️ ENDPOINTS DA API
 
 ### Base URL
+
 ```
 http://localhost:8080/api/v1
 ```
 
 ### **CLIENTES**
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| POST | `/clients` | Criar novo cliente |
-| GET | `/clients` | Listar todos os clientes |
-| GET | `/clients/:id` | Buscar cliente por ID |
-| PUT | `/clients/:id` | Atualizar cliente |
-| DELETE | `/clients/:id` | Deletar cliente (soft delete) |
-| GET | `/clients/:id/vehicles` | Listar veículos do cliente |
-| GET | `/clients/:id/history` | Histórico de OS do cliente |
+| Método | Endpoint                | Descrição                     |
+| ------ | ----------------------- | ----------------------------- |
+| POST   | `/clients`              | Criar novo cliente            |
+| GET    | `/clients`              | Listar todos os clientes      |
+| GET    | `/clients/:id`          | Buscar cliente por ID         |
+| PUT    | `/clients/:id`          | Atualizar cliente             |
+| DELETE | `/clients/:id`          | Deletar cliente (soft delete) |
+| GET    | `/clients/:id/vehicles` | Listar veículos do cliente    |
+| GET    | `/clients/:id/history`  | Histórico de OS do cliente    |
 
 ### **VEÍCULOS**
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| POST | `/vehicles` | Cadastrar veículo |
-| GET | `/vehicles` | Listar todos os veículos |
-| GET | `/vehicles/:id` | Buscar veículo por ID |
-| GET | `/vehicles/plate/:plate` | Buscar veículo por placa |
-| PUT | `/vehicles/:id` | Atualizar veículo |
-| DELETE | `/vehicles/:id` | Deletar veículo |
+| Método | Endpoint                 | Descrição                |
+| ------ | ------------------------ | ------------------------ |
+| POST   | `/vehicles`              | Cadastrar veículo        |
+| GET    | `/vehicles`              | Listar todos os veículos |
+| GET    | `/vehicles/:id`          | Buscar veículo por ID    |
+| GET    | `/vehicles/plate/:plate` | Buscar veículo por placa |
+| PUT    | `/vehicles/:id`          | Atualizar veículo        |
+| DELETE | `/vehicles/:id`          | Deletar veículo          |
 
 ### **ORDENS DE SERVIÇO**
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| POST | `/service-orders` | Criar nova OS |
-| GET | `/service-orders` | Listar todas as OS |
-| GET | `/service-orders/:id` | Buscar OS por ID |
-| PUT | `/service-orders/:id` | Atualizar OS |
-| PATCH | `/service-orders/:id/status` | Atualizar apenas o status |
-| GET | `/service-orders/client/:client_id` | OS por cliente |
-| GET | `/service-orders/vehicle/:vehicle_id` | OS por veículo |
+| Método | Endpoint                              | Descrição                 |
+| ------ | ------------------------------------- | ------------------------- |
+| POST   | `/service-orders`                     | Criar nova OS             |
+| GET    | `/service-orders`                     | Listar todas as OS        |
+| GET    | `/service-orders/:id`                 | Buscar OS por ID          |
+| PUT    | `/service-orders/:id`                 | Atualizar OS              |
+| PATCH  | `/service-orders/:id/status`          | Atualizar apenas o status |
+| GET    | `/service-orders/client/:client_id`   | OS por cliente            |
+| GET    | `/service-orders/vehicle/:vehicle_id` | OS por veículo            |
 
 ### **ORÇAMENTOS**
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| POST | `/budgets` | Criar orçamento para OS |
-| GET | `/budgets/:id` | Buscar orçamento |
-| PUT | `/budgets/:id` | Atualizar orçamento |
-| PATCH | `/budgets/:id/approve` | Aprovar orçamento |
-| PATCH | `/budgets/:id/reject` | Recusar orçamento |
-| POST | `/budgets/:id/items` | Adicionar item ao orçamento |
+| Método | Endpoint               | Descrição                   |
+| ------ | ---------------------- | --------------------------- |
+| POST   | `/budgets`             | Criar orçamento para OS     |
+| GET    | `/budgets/:id`         | Buscar orçamento            |
+| PUT    | `/budgets/:id`         | Atualizar orçamento         |
+| PATCH  | `/budgets/:id/approve` | Aprovar orçamento           |
+| PATCH  | `/budgets/:id/reject`  | Recusar orçamento           |
+| POST   | `/budgets/:id/items`   | Adicionar item ao orçamento |
 
 ### **PAGAMENTOS**
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| POST | `/payments` | Registrar pagamento |
-| GET | `/payments/service-order/:service_order_id` | Buscar pagamentos de uma OS |
-| GET | `/payments/:id` | Buscar pagamento por ID |
+| Método | Endpoint                                    | Descrição                   |
+| ------ | ------------------------------------------- | --------------------------- |
+| POST   | `/payments`                                 | Registrar pagamento         |
+| GET    | `/payments/service-order/:service_order_id` | Buscar pagamentos de uma OS |
+| GET    | `/payments/:id`                             | Buscar pagamento por ID     |
 
 ---
 
@@ -921,28 +970,31 @@ http://localhost:8080/api/v1
 ## 📅 PLANO DE EXECUÇÃO
 
 ### **Sprint 1 - Setup Inicial (Semana 1)**
-- [ ] Configurar ambiente Go
-- [ ] Instalar dependências (Gin, GORM, MySQL Driver)
-- [ ] Criar estrutura de pastas
-- [ ] Configurar conexão com MySQL
-- [ ] Criar arquivo `.env`
-- [ ] Executar scripts SQL para criar tabelas
-- [ ] Configurar Air para hot reload
+
+- [x] Configurar ambiente Go
+- [x] Instalar dependências (Gin, GORM, MySQL Driver)
+- [x] Criar estrutura de pastas
+- [x] Configurar conexão com MySQL
+- [x] Criar arquivo `.env`
+- [x] Executar scripts SQL para criar tabelas
+- [x] Configurar Air para hot reload
 
 ### **Sprint 2 - Módulo Clientes (Semana 2)**
-- [ ] Criar `models/client.go`
-- [ ] Criar `dto/client_dto.go`
-- [ ] Implementar `controllers/client_controller.go`
-  - [ ] CreateClient
-  - [ ] GetClients (com paginação)
-  - [ ] GetClientByID
-  - [ ] UpdateClient
-  - [ ] DeleteClient (soft delete)
-- [ ] Configurar `routes/client_routes.go`
-- [ ] Testar todos os endpoints no Postman
-- [ ] Adicionar validações
+
+- [x] Criar `models/client.go`
+- [x] Criar `dto/client_dto.go`
+- [x] Implementar `controllers/client_controller.go`
+  - [x] CreateClient
+  - [x] GetClients (com paginação)
+  - [x] GetClientByID
+  - [x] UpdateClient
+  - [x] DeleteClient (soft delete)
+- [x] Configurar `routes/client_routes.go`
+- [x] Testar todos os endpoints no Postman
+- [x] Adicionar validações
 
 ### **Sprint 3 - Módulo Veículos (Semana 3)**
+
 - [ ] Criar `models/vehicle.go` com relacionamento
 - [ ] Criar `dto/vehicle_dto.go`
 - [ ] Implementar `controllers/vehicle_controller.go`
@@ -954,6 +1006,7 @@ http://localhost:8080/api/v1
 - [ ] Validar placa e dados
 
 ### **Sprint 4 - Módulo OS (Semanas 4-5)**
+
 - [ ] Criar `models/service_order.go`
 - [ ] Criar `dto/service_order_dto.go`
 - [ ] Implementar `controllers/service_order_controller.go`
@@ -966,6 +1019,7 @@ http://localhost:8080/api/v1
 - [ ] Testar fluxo completo
 
 ### **Sprint 5 - Módulo Orçamento (Semana 5)**
+
 - [ ] Criar `models/budget.go` e `models/budget_item.go`
 - [ ] Criar `dto/budget_dto.go`
 - [ ] Implementar `controllers/budget_controller.go`
@@ -977,6 +1031,7 @@ http://localhost:8080/api/v1
 - [ ] Testar cálculos
 
 ### **Sprint 6 - Módulo Pagamento (Semana 6)**
+
 - [ ] Criar `models/payment.go`
 - [ ] Criar `dto/payment_dto.go`
 - [ ] Implementar `controllers/payment_controller.go`
@@ -986,6 +1041,7 @@ http://localhost:8080/api/v1
 - [ ] Finalizar fluxo completo
 
 ### **Sprint 7 - Melhorias e Testes (Semana 7)**
+
 - [ ] Implementar endpoint de histórico
 - [ ] Adicionar filtros avançados
 - [ ] Tratamento de erros robusto
@@ -1000,6 +1056,7 @@ http://localhost:8080/api/v1
 ### **1. Configuração Inicial**
 
 **Instalar dependências:**
+
 ```bash
 go get -u github.com/gin-gonic/gin
 go get -u gorm.io/gorm
@@ -1009,6 +1066,7 @@ go get -u github.com/go-playground/validator/v10
 ```
 
 **Criar arquivo `.env`:**
+
 ```env
 # Database
 DB_HOST=localhost
@@ -1028,6 +1086,7 @@ JWT_SECRET=sua_chave_secreta_aqui
 ### **2. Criar Banco de Dados**
 
 Executar o script SQL completo no MySQL:
+
 ```bash
 mysql -u root -p < create_database.sql
 ```
@@ -1035,6 +1094,7 @@ mysql -u root -p < create_database.sql
 ### **3. Estruturar Projeto**
 
 Criar todas as pastas:
+
 ```bash
 mkdir -p controllers database dto models routes middlewares pkg/validator pkg/response
 ```
@@ -1042,6 +1102,7 @@ mkdir -p controllers database dto models routes middlewares pkg/validator pkg/re
 ### **4. Implementar Conexão com Banco**
 
 Arquivo `database/connection.go`:
+
 ```go
 package database
 
@@ -1049,7 +1110,7 @@ import (
     "fmt"
     "log"
     "os"
-    
+
     "gorm.io/driver/mysql"
     "gorm.io/gorm"
 )
@@ -1065,13 +1126,13 @@ func ConnectDatabase() {
         os.Getenv("DB_PORT"),
         os.Getenv("DB_NAME"),
     )
-    
+
     var err error
     DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
     if err != nil {
         log.Fatal("Erro ao conectar no banco de dados:", err)
     }
-    
+
     log.Println("✅ Conexão com banco de dados estabelecida!")
 }
 ```
@@ -1079,6 +1140,7 @@ func ConnectDatabase() {
 ### **5. Começar pelo Módulo de Clientes**
 
 Seguir a ordem:
+
 1. `models/client.go`
 2. `dto/client_dto.go`
 3. `controllers/client_controller.go`
@@ -1090,6 +1152,7 @@ Seguir a ordem:
 ## 🚀 COMANDOS ÚTEIS
 
 ### **Iniciar projeto:**
+
 ```bash
 # Com Air (hot reload)
 air
@@ -1099,6 +1162,7 @@ go run main.go
 ```
 
 ### **Gerenciar dependências:**
+
 ```bash
 # Baixar dependências
 go mod download
@@ -1108,6 +1172,7 @@ go mod tidy
 ```
 
 ### **Testar banco:**
+
 ```bash
 # Conectar no MySQL
 mysql -u root -p
@@ -1130,11 +1195,13 @@ DESCRIBE clientes;
 ## 📚 RECURSOS DE ESTUDO
 
 ### **Documentação Oficial:**
+
 - [Go Documentation](https://go.dev/doc/)
 - [Gin Framework](https://gin-gonic.com/docs/)
 - [GORM](https://gorm.io/docs/)
 
 ### **Conceitos importantes:**
+
 - REST API
 - CRUD Operations
 - SQL Relationships (1:1, 1:N, N:N)
@@ -1161,6 +1228,7 @@ DESCRIBE clientes;
 ## 📝 NOTAS IMPORTANTES
 
 ### **Padrões de Código:**
+
 1. **Todo código em inglês** (variáveis, funções, rotas, tabelas)
 2. **Comentários em português** (para facilitar compreensão)
 3. **Nomes de arquivos em snake_case**: `client_controller.go`
@@ -1169,6 +1237,7 @@ DESCRIBE clientes;
 6. **URLs em kebab-case**: `/service-orders`, `/budget-items`
 
 ### **Boas Práticas:**
+
 1. **Sempre usar soft delete** para clients e vehicles
 2. **Validar CPF** antes de cadastrar cliente
 3. **Validar placa** (formato ABC-1234 ou ABC1D234)
