@@ -30,8 +30,6 @@ func CreateClient(c *gin.Context) {
 
 	clientCreate := create.ToClientModel()
 
-	utils.ValidateCpf(clientCreate.CPF)
-
 	cleanCpf, err := utils.ValidateCpf(clientCreate.CPF)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -40,8 +38,6 @@ func CreateClient(c *gin.Context) {
 	clientCreate.CPF = cleanCpf
 
 	// Validação do CEP usando a função utilitária
-	utils.ValidateZipCode(clientCreate.ZipCode)
-
 	cleanZip, err := utils.ValidateZipCode(clientCreate.ZipCode)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -51,9 +47,6 @@ func CreateClient(c *gin.Context) {
 	clientCreate.ZipCode = cleanZip
 
 	// Validação do telefone usando a função utilitária
-	utils.ValidateCellPhone(clientCreate.PrimaryPhone)
-
-	// Limpeza do número de telefone para armazenar apenas os dígitos
 	cleanCellPhone, err := utils.ValidateCellPhone(clientCreate.PrimaryPhone)
 
 	// Se houver um erro na validação do telefone, retorna uma resposta de erro
@@ -64,10 +57,7 @@ func CreateClient(c *gin.Context) {
 
 	clientCreate.PrimaryPhone = cleanCellPhone
 
-	// Validação do telefone usando a função utilitária
-	utils.ValidateTelePhone(clientCreate.SecondaryPhone)
-
-	// Limpeza do número de telefone para armazenar apenas os dígitos
+	// Validação do telefone secundário
 	cleanTelePhone, err := utils.ValidateTelePhone(clientCreate.SecondaryPhone)
 
 	// Se houver um erro na validação do telefone, retorna uma resposta de erro
@@ -111,21 +101,56 @@ func UpdateClient(c *gin.Context) {
 		return
 	}
 
-	var clientUpdate models.Client
-
-	if err := database.DB.First(&clientUpdate, uint(clientID)).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Cliente não encontrado"})
-		return
-	}
-
 	// GORM ignora automaticamente campos com zero-value (strings vazias, 0, false, etc.)
 	// Atualiza apenas os campos que foram enviados na requisição
 	updateData := update.ToClientModel()
 
-	if err := database.DB.Model(&clientUpdate).Updates(updateData).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao atualizar cliente:" + err.Error()})
+	cleanCpf, err := utils.ValidateCpf(updateData.CPF)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	updateData.CPF = cleanCpf
+
+	// Validação do CEP usando a função utilitária
+	cleanZip, err := utils.ValidateZipCode(updateData.ZipCode)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	updateData.ZipCode = cleanZip
+
+	// Validação do telefone primário
+	cleanCellPhone, err := utils.ValidateCellPhone(updateData.PrimaryPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	updateData.PrimaryPhone = cleanCellPhone
+
+	// Validação do telefone secundário
+	cleanTelePhone, err := utils.ValidateTelePhone(updateData.SecondaryPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	updateData.SecondaryPhone = cleanTelePhone
+
+	result := database.DB.Model(&models.Client{}).Where("id = ?", uint(clientID)).Updates(updateData)
+
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao atualizar cliente:" + result.Error.Error()})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Cliente não encontrado"})
+		return
+	}
+
+	// Busca o cliente atualizado para retornar na resposta
+	var clientUpdate models.Client
+	database.DB.First(&clientUpdate, uint(clientID))
 
 	response := dto.ToClientResponse(clientUpdate)
 
@@ -184,14 +209,15 @@ func DeleteClient(c *gin.Context) {
 
 	var clientDelete models.Client
 
-	// TODO otimizar para evitar 2 round-trips
-	if err := database.DB.First(&clientDelete, uint(ClientId)).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Cliente não encontrado"})
+	result := database.DB.Delete(&clientDelete, uint(ClientId))
+
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao deletar cliente:" + result.Error.Error()})
 		return
 	}
 
-	if err := database.DB.Delete(&clientDelete, uint(ClientId)).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao deletar cliente:" + err.Error()})
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Cliente não encontrado"})
 		return
 	}
 
