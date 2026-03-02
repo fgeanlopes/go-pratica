@@ -184,14 +184,15 @@ func DeleteClient(c *gin.Context) {
 
 	var clientDelete models.Client
 
-	// TODO otimizar para evitar 2 round-trips
-	if err := database.DB.First(&clientDelete, uint(ClientId)).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Cliente não encontrado"})
+	result := database.DB.Delete(&clientDelete, uint(ClientId))
+
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao deletar cliente:" + result.Error.Error()})
 		return
 	}
 
-	if err := database.DB.Delete(&clientDelete, uint(ClientId)).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao deletar cliente:" + err.Error()})
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Cliente não encontrado"})
 		return
 	}
 
