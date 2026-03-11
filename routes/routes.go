@@ -8,5 +8,6 @@ func SetupRoutes(router *gin.Engine) {
 	api := router.Group("/api/v1")
 	{
 		SetupClientsRoutes(api)
+		SetupVehicleRoutes(api)
 	}
 }

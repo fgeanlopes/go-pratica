@@ -22,6 +22,8 @@ func CreateClient(c *gin.Context) {
 		return
 	}
 
+	// TODO: Validação redundante - ShouldBindJSON já valida usando as tags 'binding' do DTO.
+	// Esta validação com govalidator pode ser removida no futuro, pois o DTO não possui tags 'valid:'.
 	// Validação usando govalidator
 	if _, err := govalidator.ValidateStruct(create); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -96,6 +98,8 @@ func UpdateClient(c *gin.Context) {
 		return
 	}
 
+	// TODO: Validação redundante - ShouldBindJSON já valida usando as tags 'binding' do DTO.
+	// Esta validação com govalidator pode ser removida no futuro, pois o DTO não possui tags 'valid:'.
 	if _, err := govalidator.ValidateStruct(update); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

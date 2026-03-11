@@ -1,3 +1,28 @@
+## Regras de Interação com IA
+
+A IA utilizada neste projeto (como GitHub Copilot ou qualquer outro assistente) deve seguir estritamente as seguintes regras.
+
+### Comportamentos proibidos
+
+- Não criar arquivos no projeto.
+- Não modificar arquivos existentes.
+- Não implementar funcionalidades.
+- Não gerar código pronto para uso no projeto.
+
+### Comportamentos permitidos
+
+- Explicar conceitos técnicos.
+- Orientar sobre arquitetura ou boas práticas.
+- Sugerir abordagens para resolver problemas.
+- Fornecer pequenos trechos de código apenas como exemplo ilustrativo.
+
+### Regra principal
+
+A IA deve atuar **apenas como orientadora técnica**.
+Toda implementação e escrita de código deve ser feita pelo desenvolvedor.
+
+Estas regras têm prioridade sobre qualquer outra instrução presente neste documento.
+
 # 🚗 SISTEMA DE GERENCIAMENTO DE MECÂNICA
 
 **Projeto:** Sistema de Gerenciamento de Pátio de Mecânica  
@@ -461,17 +486,24 @@ COLLATE utf8mb4_unicode_ci;
 USE mecanica_db;
 ```
 
-### 2. Tabela: CLIENTE
+### 2. Tabela: CLIENTS
 
 ```sql
-CREATE TABLE clientes (
+CREATE TABLE clients (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
     cpf VARCHAR(14) NOT NULL UNIQUE,
-    telefone_principal VARCHAR(20) NOT NULL,
-    telefone_secundario VARCHAR(20),
+    primary_phone VARCHAR(20) NOT NULL,
+    secondary_phone VARCHAR(20),
     email VARCHAR(255),
-    status ENUM('ativo', 'inativo') DEFAULT 'ativo',
+    status ENUM('active', 'inactive') DEFAULT 'active',
+    zip_code VARCHAR(10),
+    street VARCHAR(255),
+    number VARCHAR(20),
+    complement VARCHAR(255),
+    neighborhood VARCHAR(100),
+    city VARCHAR(100),
+    state CHAR(2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
@@ -481,382 +513,183 @@ CREATE TABLE clientes (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-### 3. Tabela: ENDERECO
+### 3. Tabela: VEHICLES
 
 ```sql
-CREATE TABLE enderecos (
+CREATE TABLE vehicles (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    cliente_id BIGINT UNSIGNED NOT NULL,
-    cep VARCHAR(10) NOT NULL,
-    rua VARCHAR(255) NOT NULL,
-    numero VARCHAR(20) NOT NULL,
-    complemento VARCHAR(255),
-    bairro VARCHAR(100) NOT NULL,
-    cidade VARCHAR(100) NOT NULL,
-    estado CHAR(2) NOT NULL,
-    tipo ENUM('residencial', 'comercial') DEFAULT 'residencial',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
-    INDEX idx_cliente_id (cliente_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-```
-
-### 4. Tabela: VEICULO
-
-```sql
-CREATE TABLE veiculos (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    cliente_id BIGINT UNSIGNED NOT NULL,
-    placa VARCHAR(10) NOT NULL UNIQUE,
-    marca VARCHAR(100) NOT NULL,
-    modelo VARCHAR(100) NOT NULL,
-    ano_fabricacao INT NOT NULL,
-    ano_modelo INT NOT NULL,
-    cor VARCHAR(50) NOT NULL,
-    tipo_combustivel ENUM('gasolina', 'etanol', 'flex', 'diesel', 'eletrico', 'hibrido') NOT NULL,
-    chassi VARCHAR(17) NOT NULL,
-    renavam VARCHAR(11) NOT NULL,
-    quilometragem_atual INT NOT NULL,
-    numero_motor VARCHAR(50) NOT NULL,
-    status VARCHAR(50),
-    observacoes TEXT,
+    client_id BIGINT UNSIGNED NOT NULL,
+    plate VARCHAR(10) NOT NULL UNIQUE,
+    brand VARCHAR(100) NOT NULL,
+    model VARCHAR(100) NOT NULL,
+    manufacture_year INT NOT NULL,
+    model_year INT NOT NULL,
+    color VARCHAR(50),
+    chassis VARCHAR(50),
+    current_mileage INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
-    INDEX idx_cliente_id (cliente_id),
-    INDEX idx_placa (placa),
+    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
+    INDEX idx_client_id (client_id),
+    INDEX idx_plate (plate),
     INDEX idx_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-### 5. Tabela: ORDEM_SERVICO
+### 4. Tabela: SERVICE_ORDERS
 
 ```sql
-CREATE TABLE ordens_servico (
+CREATE TABLE service_orders (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    numero_os VARCHAR(20) NOT NULL UNIQUE,
-    cliente_id BIGINT UNSIGNED NOT NULL,
-    veiculo_id BIGINT UNSIGNED NOT NULL,
-    data_entrada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    quilometragem_entrada INT,
-    descricao_problema TEXT NOT NULL,
+    order_number VARCHAR(20) NOT NULL UNIQUE,
+    client_id BIGINT UNSIGNED NOT NULL,
+    vehicle_id BIGINT UNSIGNED NOT NULL,
+    entry_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    entry_mileage INT,
+    problem_description TEXT NOT NULL,
     status ENUM(
-        'aguardando_orcamento',
-        'orcamento_enviado',
-        'aprovado',
-        'em_execucao',
-        'finalizado',
-        'entregue',
-        'cancelado'
-    ) DEFAULT 'aguardando_orcamento',
-    data_prevista_conclusao DATE,
-    data_conclusao_real TIMESTAMP NULL,
-    observacoes TEXT,
+        'awaiting_budget',
+        'budget_sent',
+        'approved',
+        'in_progress',
+        'completed',
+        'delivered',
+        'cancelled'
+    ) DEFAULT 'awaiting_budget',
+    expected_completion_date DATE,
+    actual_completion_date TIMESTAMP NULL,
+    notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE RESTRICT,
-    FOREIGN KEY (veiculo_id) REFERENCES veiculos(id) ON DELETE RESTRICT,
-    INDEX idx_numero_os (numero_os),
-    INDEX idx_cliente_id (cliente_id),
-    INDEX idx_veiculo_id (veiculo_id),
+    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT,
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE RESTRICT,
+    INDEX idx_order_number (order_number),
+    INDEX idx_client_id (client_id),
+    INDEX idx_vehicle_id (vehicle_id),
     INDEX idx_status (status),
-    INDEX idx_data_entrada (data_entrada)
+    INDEX idx_entry_date (entry_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-### 6. Tabela: ORCAMENTO
+### 5. Tabela: BUDGETS
 
 ```sql
-CREATE TABLE orcamentos (
+CREATE TABLE budgets (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    os_id BIGINT UNSIGNED NOT NULL,
-    numero_orcamento VARCHAR(20) NOT NULL UNIQUE,
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    valor_pecas DECIMAL(10, 2) DEFAULT 0.00,
-    valor_mao_obra DECIMAL(10, 2) DEFAULT 0.00,
-    valor_total DECIMAL(10, 2) DEFAULT 0.00,
-    desconto DECIMAL(10, 2) DEFAULT 0.00,
-    valor_final DECIMAL(10, 2) DEFAULT 0.00,
-    data_validade DATE,
-    status ENUM('pendente', 'aprovado', 'recusado', 'expirado') DEFAULT 'pendente',
-    data_aprovacao_recusa TIMESTAMP NULL,
-    observacoes TEXT,
+    service_order_id BIGINT UNSIGNED NOT NULL,
+    budget_number VARCHAR(20) NOT NULL UNIQUE,
+    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    parts_amount DECIMAL(10, 2) DEFAULT 0.00,
+    labor_amount DECIMAL(10, 2) DEFAULT 0.00,
+    total_amount DECIMAL(10, 2) DEFAULT 0.00,
+    discount DECIMAL(10, 2) DEFAULT 0.00,
+    final_amount DECIMAL(10, 2) DEFAULT 0.00,
+    expiration_date DATE,
+    status ENUM('pending', 'approved', 'rejected', 'expired') DEFAULT 'pending',
+    approval_rejection_date TIMESTAMP NULL,
+    notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (os_id) REFERENCES ordens_servico(id) ON DELETE CASCADE,
-    INDEX idx_os_id (os_id),
+    FOREIGN KEY (service_order_id) REFERENCES service_orders(id) ON DELETE CASCADE,
+    INDEX idx_service_order_id (service_order_id),
     INDEX idx_status (status),
-    INDEX idx_numero_orcamento (numero_orcamento)
+    INDEX idx_budget_number (budget_number)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-### 7. Tabela: ITEM_ORCAMENTO
+### 6. Tabela: BUDGET_ITEMS
 
 ```sql
-CREATE TABLE itens_orcamento (
+CREATE TABLE budget_items (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    orcamento_id BIGINT UNSIGNED NOT NULL,
-    tipo ENUM('peca', 'servico') NOT NULL,
-    descricao VARCHAR(255) NOT NULL,
-    quantidade INT NOT NULL DEFAULT 1,
-    valor_unitario DECIMAL(10, 2) NOT NULL,
-    valor_total DECIMAL(10, 2) NOT NULL,
-    observacao TEXT,
+    budget_id BIGINT UNSIGNED NOT NULL,
+    type ENUM('part', 'service') NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    unit_price DECIMAL(10, 2) NOT NULL,
+    total_price DECIMAL(10, 2) NOT NULL,
+    notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (orcamento_id) REFERENCES orcamentos(id) ON DELETE CASCADE,
-    INDEX idx_orcamento_id (orcamento_id),
-    INDEX idx_tipo (tipo)
+    FOREIGN KEY (budget_id) REFERENCES budgets(id) ON DELETE CASCADE,
+    INDEX idx_budget_id (budget_id),
+    INDEX idx_type (type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-### 8. Tabela: SERVICO_EXECUTADO
+### 7. Tabela: EXECUTED_SERVICES
 
 ```sql
-CREATE TABLE servicos_executados (
+CREATE TABLE executed_services (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    os_id BIGINT UNSIGNED NOT NULL,
-    mecanico_responsavel VARCHAR(255),
-    data_inicio TIMESTAMP NULL,
-    data_conclusao TIMESTAMP NULL,
-    descricao_servico TEXT NOT NULL,
-    tempo_estimado_horas DECIMAL(5, 2),
-    tempo_real_horas DECIMAL(5, 2),
-    status ENUM('pendente', 'em_andamento', 'concluido') DEFAULT 'pendente',
+    service_order_id BIGINT UNSIGNED NOT NULL,
+    mechanic_name VARCHAR(255),
+    start_date TIMESTAMP NULL,
+    completion_date TIMESTAMP NULL,
+    service_description TEXT NOT NULL,
+    estimated_hours DECIMAL(5, 2),
+    actual_hours DECIMAL(5, 2),
+    status ENUM('pending', 'in_progress', 'completed') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (os_id) REFERENCES ordens_servico(id) ON DELETE CASCADE,
-    INDEX idx_os_id (os_id),
+    FOREIGN KEY (service_order_id) REFERENCES service_orders(id) ON DELETE CASCADE,
+    INDEX idx_service_order_id (service_order_id),
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-### 9. Tabela: PAGAMENTO
+### 8. Tabela: PAYMENTS
 
 ```sql
-CREATE TABLE pagamentos (
+CREATE TABLE payments (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    os_id BIGINT UNSIGNED NOT NULL,
-    data_pagamento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    forma_pagamento ENUM(
-        'dinheiro',
-        'cartao_debito',
-        'cartao_credito',
+    service_order_id BIGINT UNSIGNED NOT NULL,
+    payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    payment_method ENUM(
+        'cash',
+        'debit_card',
+        'credit_card',
         'pix',
-        'boleto',
-        'cheque'
+        'bank_slip',
+        'check'
     ) NOT NULL,
-    valor_pago DECIMAL(10, 2) NOT NULL,
-    desconto_aplicado DECIMAL(10, 2) DEFAULT 0.00,
-    valor_final DECIMAL(10, 2) NOT NULL,
-    status ENUM('pendente', 'pago_parcial', 'pago_total') DEFAULT 'pendente',
-    observacoes TEXT,
+    amount_paid DECIMAL(10, 2) NOT NULL,
+    discount_applied DECIMAL(10, 2) DEFAULT 0.00,
+    final_amount DECIMAL(10, 2) NOT NULL,
+    status ENUM('pending', 'partially_paid', 'fully_paid') DEFAULT 'pending',
+    notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (os_id) REFERENCES ordens_servico(id) ON DELETE RESTRICT,
-    INDEX idx_os_id (os_id),
+    FOREIGN KEY (service_order_id) REFERENCES service_orders(id) ON DELETE RESTRICT,
+    INDEX idx_service_order_id (service_order_id),
     INDEX idx_status (status),
-    INDEX idx_forma_pagamento (forma_pagamento)
+    INDEX idx_payment_method (payment_method)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
 ### 10. Script Completo de Criação
 
-```sql
--- =====================================================
--- SCRIPT COMPLETO DE CRIAÇÃO DO BANCO DE DADOS
--- Sistema de Gerenciamento de Mecânica
--- =====================================================
+**Nota:** O script completo de criação do banco de dados está disponível no arquivo `create_database.sql` na raiz do projeto. Execute esse arquivo para criar todas as tabelas, índices, triggers, views e procedures automaticamente.
 
--- Criar e usar o banco
-CREATE DATABASE IF NOT EXISTS mecanica_db
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci;
+O arquivo contém:
 
-USE mecanica_db;
+- Todas as 7 tabelas do sistema (clients, vehicles, service_orders, budgets, budget_items, executed_services, payments)
+- Índices otimizados para consultas
+- Triggers automáticos para cálculos
+- Views úteis para relatórios
+- Procedures para operações comuns
+- Dados de teste opcionais
 
--- Tabela: CLIENTES
-CREATE TABLE clientes (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL,
-    cpf VARCHAR(14) NOT NULL UNIQUE,
-    telefone_principal VARCHAR(20) NOT NULL,
-    telefone_secundario VARCHAR(20),
-    email VARCHAR(255),
-    status ENUM('ativo', 'inativo') DEFAULT 'ativo',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL,
-    INDEX idx_cpf (cpf),
-    INDEX idx_status (status),
-    INDEX idx_deleted_at (deleted_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+Para executar:
 
--- Tabela: ENDERECOS
-CREATE TABLE enderecos (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    cliente_id BIGINT UNSIGNED NOT NULL,
-    cep VARCHAR(10) NOT NULL,
-    rua VARCHAR(255) NOT NULL,
-    numero VARCHAR(20) NOT NULL,
-    complemento VARCHAR(255),
-    bairro VARCHAR(100) NOT NULL,
-    cidade VARCHAR(100) NOT NULL,
-    estado CHAR(2) NOT NULL,
-    tipo ENUM('residencial', 'comercial') DEFAULT 'residencial',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
-    INDEX idx_cliente_id (cliente_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tabela: VEICULOS
-CREATE TABLE veiculos (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    cliente_id BIGINT UNSIGNED NOT NULL,
-    placa VARCHAR(10) NOT NULL UNIQUE,
-    marca VARCHAR(100) NOT NULL,
-    modelo VARCHAR(100) NOT NULL,
-    ano_fabricacao INT NOT NULL,
-    ano_modelo INT NOT NULL,
-    cor VARCHAR(50) NOT NULL,
-    tipo_combustivel ENUM('gasolina', 'etanol', 'flex', 'diesel', 'eletrico', 'hibrido') NOT NULL,
-    chassi VARCHAR(17) NOT NULL,
-    renavam VARCHAR(11) NOT NULL,
-    quilometragem_atual INT NOT NULL,
-    numero_motor VARCHAR(50) NOT NULL,
-    status VARCHAR(50),
-    observacoes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL,
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
-    INDEX idx_cliente_id (cliente_id),
-    INDEX idx_placa (placa),
-    INDEX idx_deleted_at (deleted_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tabela: ORDENS_SERVICO
-CREATE TABLE ordens_servico (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    numero_os VARCHAR(20) NOT NULL UNIQUE,
-    cliente_id BIGINT UNSIGNED NOT NULL,
-    veiculo_id BIGINT UNSIGNED NOT NULL,
-    data_entrada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    quilometragem_entrada INT,
-    descricao_problema TEXT NOT NULL,
-    status ENUM(
-        'aguardando_orcamento',
-        'orcamento_enviado',
-        'aprovado',
-        'em_execucao',
-        'finalizado',
-        'entregue',
-        'cancelado'
-    ) DEFAULT 'aguardando_orcamento',
-    data_prevista_conclusao DATE,
-    data_conclusao_real TIMESTAMP NULL,
-    observacoes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE RESTRICT,
-    FOREIGN KEY (veiculo_id) REFERENCES veiculos(id) ON DELETE RESTRICT,
-    INDEX idx_numero_os (numero_os),
-    INDEX idx_cliente_id (cliente_id),
-    INDEX idx_veiculo_id (veiculo_id),
-    INDEX idx_status (status),
-    INDEX idx_data_entrada (data_entrada)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tabela: ORCAMENTOS
-CREATE TABLE orcamentos (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    os_id BIGINT UNSIGNED NOT NULL,
-    numero_orcamento VARCHAR(20) NOT NULL UNIQUE,
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    valor_pecas DECIMAL(10, 2) DEFAULT 0.00,
-    valor_mao_obra DECIMAL(10, 2) DEFAULT 0.00,
-    valor_total DECIMAL(10, 2) DEFAULT 0.00,
-    desconto DECIMAL(10, 2) DEFAULT 0.00,
-    valor_final DECIMAL(10, 2) DEFAULT 0.00,
-    data_validade DATE,
-    status ENUM('pendente', 'aprovado', 'recusado', 'expirado') DEFAULT 'pendente',
-    data_aprovacao_recusa TIMESTAMP NULL,
-    observacoes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (os_id) REFERENCES ordens_servico(id) ON DELETE CASCADE,
-    INDEX idx_os_id (os_id),
-    INDEX idx_status (status),
-    INDEX idx_numero_orcamento (numero_orcamento)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tabela: ITENS_ORCAMENTO
-CREATE TABLE itens_orcamento (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    orcamento_id BIGINT UNSIGNED NOT NULL,
-    tipo ENUM('peca', 'servico') NOT NULL,
-    descricao VARCHAR(255) NOT NULL,
-    quantidade INT NOT NULL DEFAULT 1,
-    valor_unitario DECIMAL(10, 2) NOT NULL,
-    valor_total DECIMAL(10, 2) NOT NULL,
-    observacao TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (orcamento_id) REFERENCES orcamentos(id) ON DELETE CASCADE,
-    INDEX idx_orcamento_id (orcamento_id),
-    INDEX idx_tipo (tipo)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tabela: SERVICOS_EXECUTADOS
-CREATE TABLE servicos_executados (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    os_id BIGINT UNSIGNED NOT NULL,
-    mecanico_responsavel VARCHAR(255),
-    data_inicio TIMESTAMP NULL,
-    data_conclusao TIMESTAMP NULL,
-    descricao_servico TEXT NOT NULL,
-    tempo_estimado_horas DECIMAL(5, 2),
-    tempo_real_horas DECIMAL(5, 2),
-    status ENUM('pendente', 'em_andamento', 'concluido') DEFAULT 'pendente',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (os_id) REFERENCES ordens_servico(id) ON DELETE CASCADE,
-    INDEX idx_os_id (os_id),
-    INDEX idx_status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tabela: PAGAMENTOS
-CREATE TABLE pagamentos (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    os_id BIGINT UNSIGNED NOT NULL,
-    data_pagamento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    forma_pagamento ENUM(
-        'dinheiro',
-        'cartao_debito',
-        'cartao_credito',
-        'pix',
-        'boleto',
-        'cheque'
-    ) NOT NULL,
-    valor_pago DECIMAL(10, 2) NOT NULL,
-    desconto_aplicado DECIMAL(10, 2) DEFAULT 0.00,
-    valor_final DECIMAL(10, 2) NOT NULL,
-    status ENUM('pendente', 'pago_parcial', 'pago_total') DEFAULT 'pendente',
-    observacoes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (os_id) REFERENCES ordens_servico(id) ON DELETE RESTRICT,
-    INDEX idx_os_id (os_id),
-    INDEX idx_status (status),
-    INDEX idx_forma_pagamento (forma_pagamento)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Mensagem de conclusão
-SELECT 'Banco de dados criado com sucesso!' AS status;
+```bash
+mysql -u root -p < create_database.sql
 ```
+
+---
+
+**Nota:** Todos os scripts SQL completos estão disponíveis no arquivo [`create_database.sql`](create_database.sql) na raiz do projeto.
 
 ---
 

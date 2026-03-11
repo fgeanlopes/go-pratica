@@ -15,8 +15,8 @@ func SetupClientsRoutes(c *gin.RouterGroup) {
 		clients.PUT("/:id", controllers.UpdateClient)
 		clients.DELETE("/:id", controllers.DeleteClient)
 
-		//TODO work on this
-		// clients.GET("/:id/veiculos", controllers.GetVeiculosByCliente)
-		// clients.GET("/:id/historico", controllers.GetHistoricoCliente)
+		// Rotas aninhadas (nested resources) - apenas consultas
+		// clients.GET("/:id/vehicles", controllers.GetVehiclesByClient)
+		// clients.GET("/:id/history", controllers.GetServiceOrderHistory)
 	}
 }

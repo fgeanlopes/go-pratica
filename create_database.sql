@@ -2,7 +2,7 @@
 -- SISTEMA DE GERENCIAMENTO DE MECÂNICA
 -- Script de Criação do Banco de Dados MySQL
 -- Versão: 1.0
--- Data: Fevereiro 2026
+-- Data: Março 2026
 -- =====================================================
 
 -- Remover banco se já existir (cuidado em produção!)
@@ -17,16 +17,23 @@ COLLATE utf8mb4_unicode_ci;
 USE mecanica_db;
 
 -- =====================================================
--- TABELA: CLIENTES
+-- TABLE: CLIENTS
 -- =====================================================
-CREATE TABLE clientes (
+CREATE TABLE clients (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL,
-    cpf VARCHAR(14) NOT NULL UNIQUE COMMENT 'Formato: 000.000.000-00',
-    telefone_principal VARCHAR(20) NOT NULL,
-    telefone_secundario VARCHAR(20),
+    name VARCHAR(255) NOT NULL,
+    cpf VARCHAR(14) NOT NULL UNIQUE COMMENT 'Format: 000.000.000-00',
+    primary_phone VARCHAR(20) NOT NULL,
+    secondary_phone VARCHAR(20),
     email VARCHAR(255),
-    status ENUM('ativo', 'inativo') DEFAULT 'ativo',
+    status ENUM('active', 'inactive') DEFAULT 'active',
+    zip_code VARCHAR(10) COMMENT 'Format: 00000-000',
+    street VARCHAR(255),
+    number VARCHAR(20),
+    complement VARCHAR(255),
+    neighborhood VARCHAR(100),
+    city VARCHAR(100),
+    state CHAR(2) COMMENT 'State abbreviation: SP, RJ, etc',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL COMMENT 'Soft delete',
@@ -35,371 +42,343 @@ CREATE TABLE clientes (
     INDEX idx_status (status),
     INDEX idx_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-COMMENT='Cadastro de clientes da mecânica';
+COMMENT='Client registration';
 
 -- =====================================================
--- TABELA: ENDERECOS
+-- TABLE: VEHICLES
 -- =====================================================
-CREATE TABLE enderecos (
+CREATE TABLE vehicles (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    cliente_id BIGINT UNSIGNED NOT NULL,
-    cep VARCHAR(10) NOT NULL COMMENT 'Formato: 00000-000',
-    rua VARCHAR(255) NOT NULL,
-    numero VARCHAR(20) NOT NULL,
-    complemento VARCHAR(255),
-    bairro VARCHAR(100) NOT NULL,
-    cidade VARCHAR(100) NOT NULL,
-    estado CHAR(2) NOT NULL COMMENT 'Sigla do estado: SP, RJ, etc',
-    tipo ENUM('residencial', 'comercial') DEFAULT 'residencial',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
-    INDEX idx_cliente_id (cliente_id),
-    INDEX idx_cidade_estado (cidade, estado)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-COMMENT='Endereços dos clientes';
-
--- =====================================================
--- TABELA: VEICULOS
--- =====================================================
-CREATE TABLE veiculos (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    cliente_id BIGINT UNSIGNED NOT NULL,
-    placa VARCHAR(10) NOT NULL UNIQUE COMMENT 'Formatos: ABC-1234 ou ABC1D23',
-    marca VARCHAR(100) NOT NULL COMMENT 'Ex: Fiat, Volkswagen, Ford',
-    modelo VARCHAR(100) NOT NULL COMMENT 'Ex: Uno, Gol, Fiesta',
-    ano_fabricacao INT NOT NULL,
-    ano_modelo INT NOT NULL,
-    cor VARCHAR(50),
-    chassi VARCHAR(50) COMMENT 'Número do chassi',
-    quilometragem_atual INT DEFAULT 0,
+    client_id BIGINT UNSIGNED NOT NULL,
+    plate VARCHAR(10) NOT NULL UNIQUE COMMENT 'Formats: ABC-1234 or ABC1D23',
+    brand VARCHAR(100) NOT NULL COMMENT 'Ex: Fiat, Volkswagen, Ford',
+    model VARCHAR(100) NOT NULL COMMENT 'Ex: Uno, Gol, Fiesta',
+    manufacture_year INT NOT NULL,
+    model_year INT NOT NULL,
+    color VARCHAR(50),
+    chassis VARCHAR(50) COMMENT 'Chassis number',
+    current_mileage INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL COMMENT 'Soft delete',
     
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
-    INDEX idx_cliente_id (cliente_id),
-    INDEX idx_placa (placa),
-    INDEX idx_marca_modelo (marca, modelo),
+    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
+    INDEX idx_client_id (client_id),
+    INDEX idx_plate (plate),
+    INDEX idx_brand_model (brand, model),
     INDEX idx_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-COMMENT='Veículos cadastrados (um cliente pode ter vários veículos)';
+COMMENT='Registered vehicles (one client can have multiple vehicles)';
 
 -- =====================================================
--- TABELA: ORDENS_SERVICO
+-- TABLE: SERVICE_ORDERS
 -- =====================================================
-CREATE TABLE ordens_servico (
+CREATE TABLE service_orders (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    numero_os VARCHAR(20) NOT NULL UNIQUE COMMENT 'Ex: OS-2024-0001',
-    cliente_id BIGINT UNSIGNED NOT NULL,
-    veiculo_id BIGINT UNSIGNED NOT NULL,
-    data_entrada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    quilometragem_entrada INT COMMENT 'KM do veículo na entrada',
-    descricao_problema TEXT NOT NULL COMMENT 'Problema relatado pelo cliente',
+    order_number VARCHAR(20) NOT NULL UNIQUE COMMENT 'Ex: SO-2024-0001',
+    client_id BIGINT UNSIGNED NOT NULL,
+    vehicle_id BIGINT UNSIGNED NOT NULL,
+    entry_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    entry_mileage INT COMMENT 'Vehicle mileage at entry',
+    problem_description TEXT NOT NULL COMMENT 'Problem reported by client',
     status ENUM(
-        'aguardando_orcamento',
-        'orcamento_enviado',
-        'aprovado',
-        'em_execucao',
-        'finalizado',
-        'entregue',
-        'cancelado'
-    ) DEFAULT 'aguardando_orcamento',
-    data_prevista_conclusao DATE,
-    data_conclusao_real TIMESTAMP NULL,
-    observacoes TEXT COMMENT 'Observações gerais da OS',
+        'awaiting_budget',
+        'budget_sent',
+        'approved',
+        'in_progress',
+        'completed',
+        'delivered',
+        'cancelled'
+    ) DEFAULT 'awaiting_budget',
+    expected_completion_date DATE,
+    actual_completion_date TIMESTAMP NULL,
+    notes TEXT COMMENT 'General service order notes',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE RESTRICT,
-    FOREIGN KEY (veiculo_id) REFERENCES veiculos(id) ON DELETE RESTRICT,
-    INDEX idx_numero_os (numero_os),
-    INDEX idx_cliente_id (cliente_id),
-    INDEX idx_veiculo_id (veiculo_id),
+    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT,
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE RESTRICT,
+    INDEX idx_order_number (order_number),
+    INDEX idx_client_id (client_id),
+    INDEX idx_vehicle_id (vehicle_id),
     INDEX idx_status (status),
-    INDEX idx_data_entrada (data_entrada)
+    INDEX idx_entry_date (entry_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-COMMENT='Ordens de serviço (OS) - controle de entrada de veículos';
+COMMENT='Service orders - vehicle entry control';
 
 -- =====================================================
--- TABELA: ORCAMENTOS
+-- TABLE: BUDGETS
 -- =====================================================
-CREATE TABLE orcamentos (
+CREATE TABLE budgets (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    os_id BIGINT UNSIGNED NOT NULL,
-    numero_orcamento VARCHAR(20) NOT NULL UNIQUE COMMENT 'Ex: ORC-2024-0001',
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    valor_pecas DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'Soma dos valores das peças',
-    valor_mao_obra DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'Soma dos valores dos serviços',
-    valor_total DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'valor_pecas + valor_mao_obra',
-    desconto DECIMAL(10, 2) DEFAULT 0.00,
-    valor_final DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'valor_total - desconto',
-    data_validade DATE COMMENT 'Validade do orçamento',
-    status ENUM('pendente', 'aprovado', 'recusado', 'expirado') DEFAULT 'pendente',
-    data_aprovacao_recusa TIMESTAMP NULL,
-    observacoes TEXT,
+    service_order_id BIGINT UNSIGNED NOT NULL,
+    budget_number VARCHAR(20) NOT NULL UNIQUE COMMENT 'Ex: BUD-2024-0001',
+    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    parts_amount DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'Sum of parts values',
+    labor_amount DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'Sum of service values',
+    total_amount DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'parts_amount + labor_amount',
+    discount DECIMAL(10, 2) DEFAULT 0.00,
+    final_amount DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'total_amount - discount',
+    expiration_date DATE COMMENT 'Budget expiration date',
+    status ENUM('pending', 'approved', 'rejected', 'expired') DEFAULT 'pending',
+    approval_rejection_date TIMESTAMP NULL,
+    notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (os_id) REFERENCES ordens_servico(id) ON DELETE CASCADE,
-    INDEX idx_os_id (os_id),
+    FOREIGN KEY (service_order_id) REFERENCES service_orders(id) ON DELETE CASCADE,
+    INDEX idx_service_order_id (service_order_id),
     INDEX idx_status (status),
-    INDEX idx_numero_orcamento (numero_orcamento),
-    INDEX idx_data_validade (data_validade)
+    INDEX idx_budget_number (budget_number),
+    INDEX idx_expiration_date (expiration_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-COMMENT='Orçamentos gerados para cada OS';
+COMMENT='Budgets generated for each service order';
 
 -- =====================================================
--- TABELA: ITENS_ORCAMENTO
+-- TABLE: BUDGET_ITEMS
 -- =====================================================
-CREATE TABLE itens_orcamento (
+CREATE TABLE budget_items (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    orcamento_id BIGINT UNSIGNED NOT NULL,
-    tipo ENUM('peca', 'servico') NOT NULL COMMENT 'Tipo do item',
-    descricao VARCHAR(255) NOT NULL COMMENT 'Descrição da peça ou serviço',
-    quantidade INT NOT NULL DEFAULT 1,
-    valor_unitario DECIMAL(10, 2) NOT NULL,
-    valor_total DECIMAL(10, 2) NOT NULL COMMENT 'quantidade * valor_unitario',
-    observacao TEXT,
+    budget_id BIGINT UNSIGNED NOT NULL,
+    type ENUM('part', 'service') NOT NULL COMMENT 'Item type',
+    description VARCHAR(255) NOT NULL COMMENT 'Part or service description',
+    quantity INT NOT NULL DEFAULT 1,
+    unit_price DECIMAL(10, 2) NOT NULL,
+    total_price DECIMAL(10, 2) NOT NULL COMMENT 'quantity * unit_price',
+    notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (orcamento_id) REFERENCES orcamentos(id) ON DELETE CASCADE,
-    INDEX idx_orcamento_id (orcamento_id),
-    INDEX idx_tipo (tipo)
+    FOREIGN KEY (budget_id) REFERENCES budgets(id) ON DELETE CASCADE,
+    INDEX idx_budget_id (budget_id),
+    INDEX idx_type (type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-COMMENT='Itens detalhados de cada orçamento (peças e serviços)';
+COMMENT='Detailed items of each budget (parts and services)';
 
 -- =====================================================
--- TABELA: SERVICOS_EXECUTADOS
+-- TABLE: EXECUTED_SERVICES
 -- =====================================================
-CREATE TABLE servicos_executados (
+CREATE TABLE executed_services (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    os_id BIGINT UNSIGNED NOT NULL,
-    mecanico_responsavel VARCHAR(255) COMMENT 'Nome do mecânico',
-    data_inicio TIMESTAMP NULL,
-    data_conclusao TIMESTAMP NULL,
-    descricao_servico TEXT NOT NULL COMMENT 'Detalhamento do serviço realizado',
-    tempo_estimado_horas DECIMAL(5, 2) COMMENT 'Tempo estimado em horas',
-    tempo_real_horas DECIMAL(5, 2) COMMENT 'Tempo real gasto',
-    status ENUM('pendente', 'em_andamento', 'concluido') DEFAULT 'pendente',
+    service_order_id BIGINT UNSIGNED NOT NULL,
+    mechanic_name VARCHAR(255) COMMENT 'Mechanic name',
+    start_date TIMESTAMP NULL,
+    completion_date TIMESTAMP NULL,
+    service_description TEXT NOT NULL COMMENT 'Service details',
+    estimated_hours DECIMAL(5, 2) COMMENT 'Estimated time in hours',
+    actual_hours DECIMAL(5, 2) COMMENT 'Actual time spent',
+    status ENUM('pending', 'in_progress', 'completed') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (os_id) REFERENCES ordens_servico(id) ON DELETE CASCADE,
-    INDEX idx_os_id (os_id),
+    FOREIGN KEY (service_order_id) REFERENCES service_orders(id) ON DELETE CASCADE,
+    INDEX idx_service_order_id (service_order_id),
     INDEX idx_status (status),
-    INDEX idx_mecanico (mecanico_responsavel)
+    INDEX idx_mechanic (mechanic_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-COMMENT='Registro dos serviços executados em cada OS';
+COMMENT='Record of services executed for each service order';
 
 -- =====================================================
--- TABELA: PAGAMENTOS
+-- TABLE: PAYMENTS
 -- =====================================================
-CREATE TABLE pagamentos (
+CREATE TABLE payments (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    os_id BIGINT UNSIGNED NOT NULL,
-    data_pagamento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    forma_pagamento ENUM(
-        'dinheiro',
-        'cartao_debito',
-        'cartao_credito',
+    service_order_id BIGINT UNSIGNED NOT NULL,
+    payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    payment_method ENUM(
+        'cash',
+        'debit_card',
+        'credit_card',
         'pix',
-        'boleto',
-        'cheque'
+        'bank_slip',
+        'check'
     ) NOT NULL,
-    valor_pago DECIMAL(10, 2) NOT NULL,
-    desconto_aplicado DECIMAL(10, 2) DEFAULT 0.00,
-    valor_final DECIMAL(10, 2) NOT NULL COMMENT 'valor_pago - desconto_aplicado',
-    status ENUM('pendente', 'pago_parcial', 'pago_total') DEFAULT 'pendente',
-    observacoes TEXT,
+    amount_paid DECIMAL(10, 2) NOT NULL,
+    discount_applied DECIMAL(10, 2) DEFAULT 0.00,
+    final_amount DECIMAL(10, 2) NOT NULL COMMENT 'amount_paid - discount_applied',
+    status ENUM('pending', 'partially_paid', 'fully_paid') DEFAULT 'pending',
+    notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (os_id) REFERENCES ordens_servico(id) ON DELETE RESTRICT,
-    INDEX idx_os_id (os_id),
+    FOREIGN KEY (service_order_id) REFERENCES service_orders(id) ON DELETE RESTRICT,
+    INDEX idx_service_order_id (service_order_id),
     INDEX idx_status (status),
-    INDEX idx_forma_pagamento (forma_pagamento),
-    INDEX idx_data_pagamento (data_pagamento)
+    INDEX idx_payment_method (payment_method),
+    INDEX idx_payment_date (payment_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-COMMENT='Registro de pagamentos das OS';
+COMMENT='Service order payment records';
 
 -- =====================================================
--- DADOS DE TESTE (OPCIONAL)
+-- TEST DATA (OPTIONAL)
 -- =====================================================
 
--- Inserir cliente de teste
-INSERT INTO clientes (nome, cpf, telefone_principal, email, status) VALUES
-('João da Silva', '123.456.789-00', '(11) 98765-4321', 'joao.silva@email.com', 'ativo'),
-('Maria Oliveira', '987.654.321-00', '(11) 91234-5678', 'maria.oliveira@email.com', 'ativo');
+-- Insert test clients
+INSERT INTO clients (name, cpf, primary_phone, email, status) VALUES
+('João da Silva', '123.456.789-00', '(11) 98765-4321', 'joao.silva@email.com', 'active'),
+('Maria Oliveira', '987.654.321-00', '(11) 91234-5678', 'maria.oliveira@email.com', 'active');
 
--- Inserir endereço de teste
-INSERT INTO enderecos (cliente_id, cep, rua, numero, bairro, cidade, estado) VALUES
-(1, '01310-100', 'Avenida Paulista', '1000', 'Bela Vista', 'São Paulo', 'SP'),
-(2, '01310-200', 'Rua Augusta', '500', 'Consolação', 'São Paulo', 'SP');
+-- Insert test vehicles
+INSERT INTO vehicles (client_id, plate, brand, model, manufacture_year, model_year, color, current_mileage) VALUES
+(1, 'ABC-1234', 'Fiat', 'Uno', 2020, 2020, 'White', 50000),
+(1, 'DEF-5678', 'Volkswagen', 'Gol', 2019, 2019, 'Silver', 80000),
+(2, 'GHI-9012', 'Chevrolet', 'Onix', 2021, 2022, 'Black', 30000);
 
--- Inserir veículos de teste
-INSERT INTO veiculos (cliente_id, placa, marca, modelo, ano_fabricacao, ano_modelo, cor, quilometragem_atual) VALUES
-(1, 'ABC-1234', 'Fiat', 'Uno', 2020, 2020, 'Branco', 50000),
-(1, 'DEF-5678', 'Volkswagen', 'Gol', 2019, 2019, 'Prata', 80000),
-(2, 'GHI-9012', 'Chevrolet', 'Onix', 2021, 2022, 'Preto', 30000);
-
--- Inserir OS de teste
-INSERT INTO ordens_servico (numero_os, cliente_id, veiculo_id, quilometragem_entrada, descricao_problema, status) VALUES
-('OS-2024-0001', 1, 1, 50000, 'Barulho estranho no motor e luz do painel acesa', 'aguardando_orcamento'),
-('OS-2024-0002', 2, 3, 30000, 'Troca de óleo e revisão dos 30 mil km', 'aprovado');
+-- Insert test service orders
+INSERT INTO service_orders (order_number, client_id, vehicle_id, entry_mileage, problem_description, status) VALUES
+('SO-2024-0001', 1, 1, 50000, 'Strange engine noise and dashboard light on', 'awaiting_budget'),
+('SO-2024-0002', 2, 3, 30000, 'Oil change and 30k km service', 'approved');
 
 -- =====================================================
--- VIEWS ÚTEIS
+-- USEFUL VIEWS
 -- =====================================================
 
--- View: OS com dados completos do cliente e veículo
-CREATE OR REPLACE VIEW vw_os_completas AS
+-- View: Service orders with complete client and vehicle data
+CREATE OR REPLACE VIEW vw_complete_service_orders AS
 SELECT 
-    os.id,
-    os.numero_os,
-    os.data_entrada,
-    os.status,
-    c.nome AS cliente_nome,
-    c.cpf AS cliente_cpf,
-    c.telefone_principal AS cliente_telefone,
-    v.placa AS veiculo_placa,
-    v.marca AS veiculo_marca,
-    v.modelo AS veiculo_modelo,
-    os.descricao_problema,
-    os.data_prevista_conclusao
-FROM ordens_servico os
-INNER JOIN clientes c ON os.cliente_id = c.id
-INNER JOIN veiculos v ON os.veiculo_id = v.id
-WHERE os.deleted_at IS NULL;
+    so.id,
+    so.order_number,
+    so.entry_date,
+    so.status,
+    c.name AS client_name,
+    c.cpf AS client_cpf,
+    c.primary_phone AS client_phone,
+    v.plate AS vehicle_plate,
+    v.brand AS vehicle_brand,
+    v.model AS vehicle_model,
+    so.problem_description,
+    so.expected_completion_date
+FROM service_orders so
+INNER JOIN clients c ON so.client_id = c.id
+INNER JOIN vehicles v ON so.vehicle_id = v.id
+WHERE so.deleted_at IS NULL;
 
--- View: Resumo financeiro por OS
-CREATE OR REPLACE VIEW vw_resumo_financeiro_os AS
+-- View: Financial summary per service order
+CREATE OR REPLACE VIEW vw_financial_summary AS
 SELECT 
-    os.id AS os_id,
-    os.numero_os,
-    orc.valor_final AS valor_orcamento,
-    COALESCE(SUM(p.valor_final), 0) AS valor_pago,
-    (orc.valor_final - COALESCE(SUM(p.valor_final), 0)) AS saldo_pendente,
+    so.id AS service_order_id,
+    so.order_number,
+    b.final_amount AS budget_amount,
+    COALESCE(SUM(p.final_amount), 0) AS amount_paid,
+    (b.final_amount - COALESCE(SUM(p.final_amount), 0)) AS pending_balance,
     CASE 
-        WHEN COALESCE(SUM(p.valor_final), 0) >= orc.valor_final THEN 'pago'
-        WHEN COALESCE(SUM(p.valor_final), 0) > 0 THEN 'parcial'
-        ELSE 'pendente'
-    END AS situacao_pagamento
-FROM ordens_servico os
-LEFT JOIN orcamentos orc ON os.id = orc.os_id AND orc.status = 'aprovado'
-LEFT JOIN pagamentos p ON os.id = p.os_id
-GROUP BY os.id, os.numero_os, orc.valor_final;
+        WHEN COALESCE(SUM(p.final_amount), 0) >= b.final_amount THEN 'paid'
+        WHEN COALESCE(SUM(p.final_amount), 0) > 0 THEN 'partial'
+        ELSE 'pending'
+    END AS payment_status
+FROM service_orders so
+LEFT JOIN budgets b ON so.id = b.service_order_id AND b.status = 'approved'
+LEFT JOIN payments p ON so.id = p.service_order_id
+GROUP BY so.id, so.order_number, b.final_amount;
 
 -- =====================================================
 -- TRIGGERS
 -- =====================================================
 
--- Trigger: Calcular valor_total do item ao inserir
+-- Trigger: Calculate total_price of item on insert
 DELIMITER $$
-CREATE TRIGGER trg_calcula_valor_item_insert
-BEFORE INSERT ON itens_orcamento
+CREATE TRIGGER trg_calculate_item_price_insert
+BEFORE INSERT ON budget_items
 FOR EACH ROW
 BEGIN
-    SET NEW.valor_total = NEW.quantidade * NEW.valor_unitario;
+    SET NEW.total_price = NEW.quantity * NEW.unit_price;
 END$$
 DELIMITER ;
 
--- Trigger: Calcular valor_total do item ao atualizar
+-- Trigger: Calculate total_price of item on update
 DELIMITER $$
-CREATE TRIGGER trg_calcula_valor_item_update
-BEFORE UPDATE ON itens_orcamento
+CREATE TRIGGER trg_calculate_item_price_update
+BEFORE UPDATE ON budget_items
 FOR EACH ROW
 BEGIN
-    SET NEW.valor_total = NEW.quantidade * NEW.valor_unitario;
+    SET NEW.total_price = NEW.quantity * NEW.unit_price;
 END$$
 DELIMITER ;
 
--- Trigger: Atualizar totais do orçamento quando adicionar item
+-- Trigger: Update budget totals when adding item
 DELIMITER $$
-CREATE TRIGGER trg_atualiza_orcamento_after_item_insert
-AFTER INSERT ON itens_orcamento
+CREATE TRIGGER trg_update_budget_after_item_insert
+AFTER INSERT ON budget_items
 FOR EACH ROW
 BEGIN
-    UPDATE orcamentos
+    UPDATE budgets
     SET 
-        valor_pecas = (
-            SELECT COALESCE(SUM(valor_total), 0) 
-            FROM itens_orcamento 
-            WHERE orcamento_id = NEW.orcamento_id AND tipo = 'peca'
+        parts_amount = (
+            SELECT COALESCE(SUM(total_price), 0) 
+            FROM budget_items 
+            WHERE budget_id = NEW.budget_id AND type = 'part'
         ),
-        valor_mao_obra = (
-            SELECT COALESCE(SUM(valor_total), 0) 
-            FROM itens_orcamento 
-            WHERE orcamento_id = NEW.orcamento_id AND tipo = 'servico'
+        labor_amount = (
+            SELECT COALESCE(SUM(total_price), 0) 
+            FROM budget_items 
+            WHERE budget_id = NEW.budget_id AND type = 'service'
         )
-    WHERE id = NEW.orcamento_id;
+    WHERE id = NEW.budget_id;
     
-    UPDATE orcamentos
+    UPDATE budgets
     SET 
-        valor_total = valor_pecas + valor_mao_obra,
-        valor_final = valor_pecas + valor_mao_obra - desconto
-    WHERE id = NEW.orcamento_id;
+        total_amount = parts_amount + labor_amount,
+        final_amount = parts_amount + labor_amount - discount
+    WHERE id = NEW.budget_id;
 END$$
 DELIMITER ;
 
 -- =====================================================
--- PROCEDURES ÚTEIS
+-- USEFUL PROCEDURES
 -- =====================================================
 
--- Procedure: Buscar histórico de um cliente
+-- Procedure: Get client history
 DELIMITER $$
-CREATE PROCEDURE sp_historico_cliente(IN p_cliente_id BIGINT)
+CREATE PROCEDURE sp_client_history(IN p_client_id BIGINT)
 BEGIN
     SELECT 
-        os.numero_os,
-        os.data_entrada,
-        os.status,
-        v.placa,
-        v.marca,
-        v.modelo,
-        os.descricao_problema,
-        orc.valor_final AS valor_orcamento
-    FROM ordens_servico os
-    INNER JOIN veiculos v ON os.veiculo_id = v.id
-    LEFT JOIN orcamentos orc ON os.id = orc.os_id AND orc.status = 'aprovado'
-    WHERE os.cliente_id = p_cliente_id
-    ORDER BY os.data_entrada DESC;
+        so.order_number,
+        so.entry_date,
+        so.status,
+        v.plate,
+        v.brand,
+        v.model,
+        so.problem_description,
+        b.final_amount AS budget_amount
+    FROM service_orders so
+    INNER JOIN vehicles v ON so.vehicle_id = v.id
+    LEFT JOIN budgets b ON so.id = b.service_order_id AND b.status = 'approved'
+    WHERE so.client_id = p_client_id
+    ORDER BY so.entry_date DESC;
 END$$
 DELIMITER ;
 
--- Procedure: Buscar OS pendentes de orçamento
+-- Procedure: Get service orders awaiting budget
 DELIMITER $$
-CREATE PROCEDURE sp_os_pendentes_orcamento()
+CREATE PROCEDURE sp_pending_budget_orders()
 BEGIN
     SELECT 
-        os.numero_os,
-        c.nome AS cliente,
-        v.placa,
-        v.modelo,
-        os.descricao_problema,
-        os.data_entrada,
-        DATEDIFF(CURRENT_DATE, DATE(os.data_entrada)) AS dias_aguardando
-    FROM ordens_servico os
-    INNER JOIN clientes c ON os.cliente_id = c.id
-    INNER JOIN veiculos v ON os.veiculo_id = v.id
-    WHERE os.status = 'aguardando_orcamento'
-    ORDER BY os.data_entrada ASC;
+        so.order_number,
+        c.name AS client_name,
+        v.plate,
+        v.model,
+        so.problem_description,
+        so.entry_date,
+        DATEDIFF(CURRENT_DATE, DATE(so.entry_date)) AS days_waiting
+    FROM service_orders so
+    INNER JOIN clients c ON so.client_id = c.id
+    INNER JOIN vehicles v ON so.vehicle_id = v.id
+    WHERE so.status = 'awaiting_budget'
+    ORDER BY so.entry_date ASC;
 END$$
 DELIMITER ;
 
 -- =====================================================
--- MENSAGEM DE SUCESSO
+-- SUCCESS MESSAGE
 -- =====================================================
 SELECT 
-    '✅ Banco de dados criado com sucesso!' AS status,
-    DATABASE() AS banco_atual,
-    (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()) AS total_tabelas;
+    '✅ Database created successfully!' AS status,
+    DATABASE() AS current_database,
+    (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()) AS total_tables;
 
--- Listar todas as tabelas criadas
+-- List all created tables
 SHOW TABLES;
 
 -- =====================================================
--- FIM DO SCRIPT
+-- END OF SCRIPT
 -- =====================================================
